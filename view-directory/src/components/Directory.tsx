@@ -58,7 +58,17 @@ export const Directory: React.FC<{ node: NormalizedFileNode }> = ({ node }) => {
         <div className="directory">
             <div
                 className="directory-header"
+                role="button"
+                tabIndex={0}
+                aria-expanded={isOpen}
+                aria-label={`Folder: ${node.name}`}
                 onClick={handleToggle}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleToggle();
+                    }
+                }}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
                 style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px 0', userSelect: 'none' }}

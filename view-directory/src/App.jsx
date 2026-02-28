@@ -20,7 +20,9 @@ function App() {
     <FileSystemProvider>
       <div className="app-container">
         <h2>File Explorer</h2>
-        <ExplorerRoot />
+        <main aria-label="File Explorer">
+          <ExplorerRoot />
+        </main>
       </div>
     </FileSystemProvider>
   )

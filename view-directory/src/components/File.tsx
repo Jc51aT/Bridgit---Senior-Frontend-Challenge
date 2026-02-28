@@ -8,7 +8,16 @@ export const File: React.FC<{ node: NormalizedFileNode }> = ({ node }) => {
     return (
         <div
             className="file"
+            role="button"
+            tabIndex={0}
+            aria-label={`File: ${node.name}`}
             onClick={() => toggleSelection(node.id)}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleSelection(node.id);
+                }
+            }}
             style={{
                 cursor: 'pointer',
                 display: 'flex',
