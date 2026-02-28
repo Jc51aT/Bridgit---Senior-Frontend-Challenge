@@ -43,9 +43,8 @@ export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
         <div
             ref={parentRef}
             style={{
-                maxHeight: parentId === 'root' ? '80vh' : '400px',
-                overflowY: 'auto',
-                contain: 'strict'
+                height: parentId === 'root' ? '80vh' : '400px',
+                overflowY: 'auto'
             }}
         >
             <div
