@@ -2,6 +2,7 @@ import './App.css';
 import { FileList } from './components/FileList';
 import { Breadcrumbs } from './components/Breadcrumbs';
 import { ActiveNodeProvider } from './contexts/ActiveNodeContext';
+import { ExpandedProvider } from './contexts/ExpandedContext';
 import { DndContext, DragEndEvent, PointerSensor, KeyboardSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RawFileNode } from './types';
@@ -76,19 +77,21 @@ function App() {
   };
 
   return (
-    <ActiveNodeProvider>
-      <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
-        <div className="app-container">
-          <h2>File Explorer</h2>
-          <Breadcrumbs />
-          <main aria-label="File Explorer">
-            <div className="explorer-root" style={{ textAlign: 'left', minWidth: '300px' }}>
-              <FileList parentId="root" />
-            </div>
-          </main>
-        </div>
-      </DndContext>
-    </ActiveNodeProvider>
+    <ExpandedProvider>
+      <ActiveNodeProvider>
+        <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
+          <div className="app-container">
+            <h2>File Explorer</h2>
+            <Breadcrumbs />
+            <main aria-label="File Explorer">
+              <div className="explorer-root" style={{ textAlign: 'left', minWidth: '300px' }}>
+                <FileList parentId="root" />
+              </div>
+            </main>
+          </div>
+        </DndContext>
+      </ActiveNodeProvider>
+    </ExpandedProvider>
   )
 }
 

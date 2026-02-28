@@ -4,11 +4,13 @@ import { FileList } from './FileList';
 import { useQueryClient } from '@tanstack/react-query';
 import { handleTreeKeyDown } from '../utils/keyboardNav';
 import { useActiveNode } from '../contexts/ActiveNodeContext';
+import { useExpanded } from '../contexts/ExpandedContext';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
 export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
-    const [isOpen, setIsOpen] = useState(false);
+    const { expandedIds, toggleExpanded } = useExpanded();
+    const isOpen = expandedIds.has(node.id);
     const queryClient = useQueryClient();
     const { setActiveNodeId, activeNodeId } = useActiveNode();
 
@@ -28,7 +30,7 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
     };
 
     const handleToggle = () => {
-        setIsOpen(!isOpen);
+        toggleExpanded(node.id);
         setActiveNodeId(node.id);
     };
 
