@@ -72,31 +72,67 @@ export const Breadcrumbs: React.FC = () => {
     };
 
     return (
-        <div className="breadcrumbs" style={{ padding: '8px', display: 'flex', gap: '8px', alignItems: 'center', minHeight: '36px', overflowX: 'auto' }}>
+        <div
+            className="breadcrumbs"
+            style={{
+                padding: '12px 16px',
+                display: 'flex',
+                gap: '8px',
+                alignItems: 'center',
+                minHeight: '44px',
+                overflowX: 'auto',
+                backgroundColor: 'var(--bg-secondary)',
+                borderBottom: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
+                fontSize: '0.95em',
+            }}
+        >
             <span
-                style={{ color: '#666', cursor: 'pointer' }}
+                className="breadcrumb-item"
+                style={{
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    padding: '4px 8px',
+                    borderRadius: 'var(--radius-sm)',
+                    transition: 'all 0.2s',
+                    fontWeight: activeNodeId === null ? '600' : '500',
+                    backgroundColor: activeNodeId === null ? 'var(--bg-active)' : 'transparent',
+                }}
                 onClick={handleRootClick}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = activeNodeId === null ? 'var(--bg-active)' : 'var(--bg-hover)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = activeNodeId === null ? 'var(--bg-active)' : 'transparent'}
                 role="button"
                 tabIndex={0}
             >
-                root
+                Root
             </span>
-            {path.map((node, index) => (
-                <React.Fragment key={node.id}>
-                    <span style={{ color: '#999' }}>/</span>
-                    <span
-                        style={{
-                            fontWeight: node.id === activeNodeId ? 'bold' : 'normal',
-                            cursor: 'pointer'
-                        }}
-                        onClick={() => handleNodeClick(node, index)}
-                        role="button"
-                        tabIndex={0}
-                    >
-                        {node.name}
-                    </span>
-                </React.Fragment>
-            ))}
+            {path.map((node, index) => {
+                const isActive = node.id === activeNodeId;
+                return (
+                    <React.Fragment key={node.id}>
+                        <span style={{ color: 'var(--border-color)', userSelect: 'none' }}>/</span>
+                        <span
+                            className="breadcrumb-item"
+                            style={{
+                                color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                fontWeight: isActive ? '600' : '500',
+                                cursor: 'pointer',
+                                padding: '4px 8px',
+                                borderRadius: 'var(--radius-sm)',
+                                transition: 'all 0.2s',
+                                backgroundColor: isActive ? 'var(--bg-active)' : 'transparent',
+                            }}
+                            onClick={() => handleNodeClick(node, index)}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isActive ? 'var(--bg-active)' : 'var(--bg-hover)'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isActive ? 'var(--bg-active)' : 'transparent'}
+                            role="button"
+                            tabIndex={0}
+                        >
+                            {node.name}
+                        </span>
+                    </React.Fragment>
+                );
+            })}
         </div>
     );
 };

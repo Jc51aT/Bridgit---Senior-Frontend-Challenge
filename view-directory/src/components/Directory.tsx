@@ -53,8 +53,11 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
         setDraggableNodeRef(element);
     };
 
+    const isActive = activeNodeId === node.id;
+    const dragOverStyle = isOver ? { backgroundColor: 'var(--accent-color)', color: 'white', borderRadius: 'var(--radius-md)' } : {};
+
     return (
-        <div className="directory">
+        <div className="directory" style={{ margin: '2px 0' }}>
             <div
                 ref={setMergedRef}
                 {...listeners}
@@ -83,19 +86,49 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
                     cursor: 'grab',
                     display: 'flex',
                     alignItems: 'center',
-                    padding: '4px 0',
+                    padding: '8px 12px',
+                    borderRadius: 'var(--radius-md)',
                     userSelect: 'none',
                     opacity: isDragging ? 0.5 : 1,
-                    backgroundColor: isOver ? 'rgba(0, 120, 215, 0.2)' : 'transparent',
                     transform: CSS.Translate.toString(transform),
+                    backgroundColor: isActive ? 'var(--bg-active)' : 'transparent',
+                    color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                    transition: 'all 0.2s ease',
+                    fontWeight: isOpen || isActive ? '600' : '500',
+                    ...dragOverStyle
+                }}
+                onMouseOver={(e) => {
+                    if (!isActive && !isOver) e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
+                }}
+                onMouseOut={(e) => {
+                    if (!isActive && !isOver) e.currentTarget.style.backgroundColor = 'transparent';
                 }}
             >
-                <span style={{ marginRight: '8px', fontSize: '1.2em' }}>{isOpen ? '📂' : '📁'}</span>
+                <span
+                    style={{
+                        marginRight: '12px',
+                        fontSize: '1.2em',
+                        transition: 'transform 0.2s ease',
+                        transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                        display: 'inline-block',
+                        filter: isActive ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' : 'none'
+                    }}
+                >
+                    {isOpen ? '📂' : '📁'}
+                </span>
                 <span>{node.name}</span>
             </div>
 
             {isOpen && (
-                <div className="directory-contents" style={{ paddingLeft: '24px', borderLeft: '1px solid #eee', marginLeft: '12px' }}>
+                <div
+                    className="directory-contents"
+                    style={{
+                        paddingLeft: '16px',
+                        borderLeft: '2px solid var(--border-color)',
+                        marginLeft: '18px',
+                        marginTop: '4px'
+                    }}
+                >
                     <FileList parentId={node.id} />
                 </div>
             )}

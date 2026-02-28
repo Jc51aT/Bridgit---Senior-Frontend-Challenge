@@ -17,23 +17,23 @@ export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
 
     if (isLoading) {
         return (
-            <div style={{ paddingLeft: '24px', color: '#888', fontStyle: 'italic', fontSize: '0.9em' }}>
-                ⏳ Loading...
+            <div style={{ padding: '12px 24px', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9em' }}>
+                <span style={{ marginRight: '8px' }}>⏳</span> Loading...
             </div>
         );
     }
 
     if (isError) {
         return (
-            <div style={{ paddingLeft: '24px', color: 'red', fontSize: '0.9em' }}>
-                ⚠️ Error loading folder: {(error as Error).message}
+            <div style={{ padding: '12px 24px', color: '#ef4444', fontSize: '0.9em', backgroundColor: '#fef2f2', borderRadius: 'var(--radius-sm)', margin: '8px 0' }}>
+                <span style={{ marginRight: '8px' }}>⚠️</span> Error loading folder: {(error as Error).message}
             </div>
         );
     }
 
     if (!nodes || nodes.length === 0) {
         return (
-            <div style={{ paddingLeft: '24px', color: '#888', fontStyle: 'italic', fontSize: '0.9em' }}>
+            <div style={{ padding: '12px 24px', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9em' }}>
                 (Empty folder)
             </div>
         );

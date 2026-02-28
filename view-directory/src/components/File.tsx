@@ -21,6 +21,8 @@ export const File: React.FC<{ node: FileNode }> = ({ node }) => {
         data: { parentId: node.parentId, type: 'file' }
     });
 
+    const isActive = activeNodeId === node.id;
+
     return (
         <div
             ref={setNodeRef}
@@ -44,14 +46,33 @@ export const File: React.FC<{ node: FileNode }> = ({ node }) => {
                 cursor: 'grab',
                 display: 'flex',
                 alignItems: 'center',
-                padding: '4px 0',
+                padding: '8px 12px',
+                margin: '2px 0',
+                borderRadius: 'var(--radius-md)',
                 userSelect: 'none',
                 opacity: isDragging ? 0.5 : 1,
                 transform: CSS.Translate.toString(transform),
+                backgroundColor: isActive ? 'var(--bg-active)' : 'transparent',
+                color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+                if (!isActive) e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
+            }}
+            onMouseLeave={(e) => {
+                if (!isActive) e.currentTarget.style.backgroundColor = 'transparent';
             }}
         >
-            <span style={{ marginRight: '8px', fontSize: '1.2em' }}>📄</span>
-            <span>{node.name}</span>
+            <span
+                style={{
+                    marginRight: '12px',
+                    fontSize: '1.2em',
+                    filter: isActive ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' : 'none'
+                }}
+            >
+                📄
+            </span>
+            <span style={{ fontWeight: isActive ? '500' : '400' }}>{node.name}</span>
         </div>
     );
 };
