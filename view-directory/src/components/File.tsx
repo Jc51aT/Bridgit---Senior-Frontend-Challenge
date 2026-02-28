@@ -1,10 +1,17 @@
 import React from 'react';
 import { FileNode } from '../types';
 import { handleTreeKeyDown } from '../utils/keyboardNav';
+import { useActiveNode } from '../contexts/ActiveNodeContext';
 
 export const File: React.FC<{ node: FileNode }> = ({ node }) => {
+    const { setActiveNodeId, activeNodeId } = useActiveNode();
+
     const handleToggleSelection = () => {
-        console.log('toggleSelection', node.id);
+        setActiveNodeId(node.id);
+    };
+
+    const handleFocus = () => {
+        setActiveNodeId(node.id);
     };
 
     return (
@@ -14,6 +21,7 @@ export const File: React.FC<{ node: FileNode }> = ({ node }) => {
             tabIndex={0}
             aria-label={`File: ${node.name}`}
             onClick={handleToggleSelection}
+            onFocus={handleFocus}
             onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();

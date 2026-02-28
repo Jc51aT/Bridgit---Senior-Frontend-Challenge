@@ -3,10 +3,12 @@ import { DirectoryNode, RawFileNode } from '../types';
 import { FileList } from './FileList';
 import { useQueryClient } from '@tanstack/react-query';
 import { handleTreeKeyDown } from '../utils/keyboardNav';
+import { useActiveNode } from '../contexts/ActiveNodeContext';
 
 export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
     const [isOpen, setIsOpen] = useState(false);
     const queryClient = useQueryClient();
+    const { setActiveNodeId, activeNodeId } = useActiveNode();
 
     const handleMouseEnter = () => {
         if (!isOpen) {
@@ -25,6 +27,11 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
 
     const handleToggle = () => {
         setIsOpen(!isOpen);
+        setActiveNodeId(node.id);
+    };
+
+    const handleFocus = () => {
+        setActiveNodeId(node.id);
     };
 
     return (
@@ -36,6 +43,7 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
                 aria-expanded={isOpen}
                 aria-label={`Folder: ${node.name}`}
                 onClick={handleToggle}
+                onFocus={handleFocus}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
