@@ -11,6 +11,8 @@
     "server": "json-server --watch db.json --port 3001"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/utilities": "^3.2.2",
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-virtual": "^3.13.19",
     "json-server": "^1.0.0-beta.12",

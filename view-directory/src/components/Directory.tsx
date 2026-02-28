@@ -4,6 +4,8 @@ import { FileList } from './FileList';
 import { useQueryClient } from '@tanstack/react-query';
 import { handleTreeKeyDown } from '../utils/keyboardNav';
 import { useActiveNode } from '../contexts/ActiveNodeContext';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 
 export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -34,9 +36,27 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
         setActiveNodeId(node.id);
     };
 
+    const { setNodeRef: setDroppableNodeRef, isOver } = useDroppable({
+        id: node.id,
+        data: { type: 'directory' }
+    });
+
+    const { attributes, listeners, setNodeRef: setDraggableNodeRef, isDragging, transform } = useDraggable({
+        id: node.id,
+        data: { parentId: node.parentId, type: 'directory' }
+    });
+
+    const setMergedRef = (element: HTMLElement | null) => {
+        setDroppableNodeRef(element);
+        setDraggableNodeRef(element);
+    };
+
     return (
         <div className="directory">
             <div
+                ref={setMergedRef}
+                {...listeners}
+                {...attributes}
                 className="directory-header"
                 role="treeitem"
                 tabIndex={0}
@@ -57,7 +77,16 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
                     }
                 }}
                 onMouseEnter={handleMouseEnter}
-                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px 0', userSelect: 'none' }}
+                style={{
+                    cursor: 'grab',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '4px 0',
+                    userSelect: 'none',
+                    opacity: isDragging ? 0.5 : 1,
+                    backgroundColor: isOver ? 'rgba(0, 120, 215, 0.2)' : 'transparent',
+                    transform: CSS.Translate.toString(transform),
+                }}
             >
                 <span style={{ marginRight: '8px', fontSize: '1.2em' }}>{isOpen ? '📂' : '📁'}</span>
                 <span>{node.name}</span>

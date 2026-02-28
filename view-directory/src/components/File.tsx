@@ -2,6 +2,8 @@ import React from 'react';
 import { FileNode } from '../types';
 import { handleTreeKeyDown } from '../utils/keyboardNav';
 import { useActiveNode } from '../contexts/ActiveNodeContext';
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 
 export const File: React.FC<{ node: FileNode }> = ({ node }) => {
     const { setActiveNodeId, activeNodeId } = useActiveNode();
@@ -14,8 +16,16 @@ export const File: React.FC<{ node: FileNode }> = ({ node }) => {
         setActiveNodeId(node.id);
     };
 
+    const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
+        id: node.id,
+        data: { parentId: node.parentId, type: 'file' }
+    });
+
     return (
         <div
+            ref={setNodeRef}
+            {...listeners}
+            {...attributes}
             className="file"
             role="treeitem"
             tabIndex={0}
@@ -31,11 +41,13 @@ export const File: React.FC<{ node: FileNode }> = ({ node }) => {
                 }
             }}
             style={{
-                cursor: 'pointer',
+                cursor: 'grab',
                 display: 'flex',
                 alignItems: 'center',
                 padding: '4px 0',
-                userSelect: 'none'
+                userSelect: 'none',
+                opacity: isDragging ? 0.5 : 1,
+                transform: CSS.Translate.toString(transform),
             }}
         >
             <span style={{ marginRight: '8px', fontSize: '1.2em' }}>📄</span>
