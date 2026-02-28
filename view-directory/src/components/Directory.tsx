@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { DirectoryNode, RawFileNode } from '../types';
 import { FileList } from './FileList';
 import { useQueryClient } from '@tanstack/react-query';
+import { handleTreeKeyDown } from '../utils/keyboardNav';
 
 export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -27,17 +28,24 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
     };
 
     return (
-        <div className="directory" role="treeitem" aria-expanded={isOpen}>
+        <div className="directory">
             <div
                 className="directory-header"
-                role="button"
+                role="treeitem"
                 tabIndex={0}
+                aria-expanded={isOpen}
                 aria-label={`Folder: ${node.name}`}
                 onClick={handleToggle}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         handleToggle();
+                    } else {
+                        handleTreeKeyDown(e as React.KeyboardEvent<HTMLElement>, {
+                            isOpen,
+                            toggle: handleToggle,
+                            isDir: true,
+                        });
                     }
                 }}
                 onMouseEnter={handleMouseEnter}

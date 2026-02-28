@@ -1,5 +1,6 @@
 import React from 'react';
 import { FileNode } from '../types';
+import { handleTreeKeyDown } from '../utils/keyboardNav';
 
 export const File: React.FC<{ node: FileNode }> = ({ node }) => {
     const handleToggleSelection = () => {
@@ -17,6 +18,8 @@ export const File: React.FC<{ node: FileNode }> = ({ node }) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     handleToggleSelection();
+                } else {
+                    handleTreeKeyDown(e as React.KeyboardEvent<HTMLElement>);
                 }
             }}
             style={{
