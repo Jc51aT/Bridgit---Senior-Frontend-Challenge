@@ -6,7 +6,7 @@ interface FileSystemActionContextType {
     state: FileSystemState;
     loading: boolean;
     error: string | null;
-    fetchChildren: (directoryId: string) => Promise<void>;
+    fetchChildren: (directoryId: string, signal?: AbortSignal) => Promise<void>;
     toggleSelection: (id: string) => void;
     // renameItem: (id: string, newName: string) => void;
     // deleteItem: (id: string) => void;
@@ -51,7 +51,7 @@ export const FileSystemProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         fetchInitialData();
     }, []);
 
-    const fetchChildren = async (directoryId: string) => {
+    const fetchChildren = async (directoryId: string, signal?: AbortSignal) => {
         // Optimistically set loading state for this directory
         setState((prevState) => {
             const dirNode = prevState.nodes[directoryId];
@@ -67,7 +67,7 @@ export const FileSystemProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         });
 
         try {
-            const response = await fetch(`http://localhost:3001/files?parentId=${directoryId}`);
+            const response = await fetch(`http://localhost:3001/files?parentId=${directoryId}`, { signal });
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -75,7 +75,11 @@ export const FileSystemProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
             setState((prevState) => normalizeFileSystemData(rawData, prevState, directoryId));
         } catch (err: any) {
-            console.error(`Failed to fetch children for directory ${directoryId}`, err);
+            if (err.name === 'AbortError') {
+                console.log(`Fetch aborted for directory ${directoryId}`);
+            } else {
+                console.error(`Failed to fetch children for directory ${directoryId}`, err);
+            }
             setState((prevState) => {
                 const dirNode = prevState.nodes[directoryId];
                 if (!dirNode) return prevState;
