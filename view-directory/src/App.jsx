@@ -1,34 +1,28 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import { FileSystemProvider, useFileSystem } from './context/FileSystemContext'
+import { FileList } from './components/FileList'
 
-function App() {
-  const [count, setCount] = useState(0)
+function ExplorerRoot() {
+  const { state, loading, error } = useFileSystem();
+
+  if (loading) return <div style={{ padding: '20px' }}>Loading files...</div>;
+  if (error) return <div style={{ padding: '20px', color: 'red' }}>Error: {error}. Make sure json-server is running!</div>;
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="explorer-root" style={{ textAlign: 'left', minWidth: '300px' }}>
+      <FileList nodeIds={state.rootIds} />
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <FileSystemProvider>
+      <div className="app-container">
+        <h2>File Explorer</h2>
+        <ExplorerRoot />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </FileSystemProvider>
   )
 }
 
