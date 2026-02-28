@@ -30,14 +30,14 @@ export const FileSystemProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
-                // Fetching from json-server port defined in package.json
-                const response = await fetch('http://localhost:3001/files');
+                // Fetching only root files initially
+                const response = await fetch('http://localhost:3001/files?parentId=root');
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const rawData = await response.json();
 
-                // The tree is fully nested, so we normalize it locally
+                // Normalize and store the initial root files
                 const normalizedData = normalizeFileSystemData(rawData);
                 setState(normalizedData);
             } catch (err: any) {
@@ -52,8 +52,43 @@ export const FileSystemProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }, []);
 
     const fetchChildren = async (directoryId: string) => {
-        // Implement fetching logic here if lazy loading is needed in the future
-        console.log('fetchChildren', directoryId);
+        // Optimistically set loading state for this directory
+        setState((prevState) => {
+            const dirNode = prevState.nodes[directoryId];
+            if (!dirNode) return prevState;
+
+            return {
+                ...prevState,
+                nodes: {
+                    ...prevState.nodes,
+                    [directoryId]: { ...dirNode, isLoading: true }
+                }
+            };
+        });
+
+        try {
+            const response = await fetch(`http://localhost:3001/files?parentId=${directoryId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const rawData = await response.json();
+
+            setState((prevState) => normalizeFileSystemData(rawData, prevState, directoryId));
+        } catch (err: any) {
+            console.error(`Failed to fetch children for directory ${directoryId}`, err);
+            setState((prevState) => {
+                const dirNode = prevState.nodes[directoryId];
+                if (!dirNode) return prevState;
+
+                return {
+                    ...prevState,
+                    nodes: {
+                        ...prevState.nodes,
+                        [directoryId]: { ...dirNode, isLoading: false }
+                    }
+                };
+            });
+        }
     };
 
     const toggleSelection = (id: string) => {

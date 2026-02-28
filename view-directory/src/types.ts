@@ -10,7 +10,7 @@ export interface RawFileNode {
     name: string;
     type: FileType;
     content?: string; // Only present if type === 'file'
-    children?: RawFileNode[]; // Only present if type === 'directory'
+    parentId: string | null;
 }
 
 // The API endpoint `GET /files` will return an array of these root nodes.
@@ -29,6 +29,8 @@ export interface NormalizedFileNode {
     content?: string;
     parentId: string | null; // null indicates it is at the root level
     childrenIds?: string[]; // Array of IDs instead of nested objects (only for directories)
+    isLoading?: boolean; // Whether children are currently being fetched
+    isLoaded?: boolean; // Whether children have been fetched
 }
 
 // This is how the data will be stored in React state

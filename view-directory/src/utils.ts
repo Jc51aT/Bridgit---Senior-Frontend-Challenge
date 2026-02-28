@@ -1,20 +1,26 @@
 import { FetchFilesResponse, FileSystemState, NormalizedFileNode, RawFileNode } from './types';
 
 /**
- * Recursively normalizes a nested tree of files into a flat dictionary
- * optimized for O(1) lookups and updates in React state.
+ * Merges newly fetched flat array of files into the existing file system state.
+ * Optimized for O(1) lookups and updates in React state.
  */
-export function normalizeFileSystemData(rawData: FetchFilesResponse): FileSystemState {
-    const nodes: Record<string, NormalizedFileNode> = {};
-    const rootIds: string[] = [];
+export function normalizeFileSystemData(
+    rawData: FetchFilesResponse,
+    existingState?: FileSystemState,
+    parentIdToUpdate?: string
+): FileSystemState {
+    const nodes: Record<string, NormalizedFileNode> = { ...(existingState?.nodes || {}) };
+    const rootIds: string[] = existingState ? [...existingState.rootIds] : [];
 
-    // Helper function for DFS traversal
-    function traverseAndNormalize(node: RawFileNode, parentId: string | null) {
+    // The fetched data is already flat
+    rawData.forEach((node) => {
         const normalizedNode: NormalizedFileNode = {
             id: node.id,
             name: node.name,
             type: node.type,
-            parentId,
+            parentId: node.parentId,
+            isLoading: false,
+            isLoaded: false,
         };
 
         if (node.type === 'file') {
@@ -23,22 +29,26 @@ export function normalizeFileSystemData(rawData: FetchFilesResponse): FileSystem
 
         if (node.type === 'directory') {
             normalizedNode.childrenIds = [];
-            if (node.children && node.children.length > 0) {
-                node.children.forEach((child) => {
-                    normalizedNode.childrenIds?.push(child.id);
-                    traverseAndNormalize(child, node.id);
-                });
-            }
         }
 
         nodes[node.id] = normalizedNode;
-    }
 
-    // Kick off traversal for all root-level items
-    rawData.forEach((rootNode) => {
-        rootIds.push(rootNode.id);
-        traverseAndNormalize(rootNode, null);
+        if (node.parentId === 'root') {
+            if (!rootIds.includes(node.id)) {
+                rootIds.push(node.id);
+            }
+        }
     });
+
+    // If we're fetching children for a specific parent, update its childrenIds and status
+    if (parentIdToUpdate && nodes[parentIdToUpdate]) {
+        nodes[parentIdToUpdate] = {
+            ...nodes[parentIdToUpdate],
+            childrenIds: rawData.map(node => node.id),
+            isLoading: false,
+            isLoaded: true,
+        };
+    }
 
     return {
         nodes,
