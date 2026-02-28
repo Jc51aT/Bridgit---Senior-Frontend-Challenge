@@ -1,21 +1,22 @@
 import React from 'react';
-import { NormalizedFileNode } from '../types';
-import { useFileSystem } from '../context/FileSystemContext';
+import { RawFileNode } from '../types';
 
-export const File: React.FC<{ node: NormalizedFileNode }> = ({ node }) => {
-    const { toggleSelection } = useFileSystem();
+export const File: React.FC<{ node: RawFileNode }> = ({ node }) => {
+    const handleToggleSelection = () => {
+        console.log('toggleSelection', node.id);
+    };
 
     return (
         <div
             className="file"
-            role="button"
+            role="treeitem"
             tabIndex={0}
             aria-label={`File: ${node.name}`}
-            onClick={() => toggleSelection(node.id)}
+            onClick={handleToggleSelection}
             onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    toggleSelection(node.id);
+                    handleToggleSelection();
                 }
             }}
             style={{
