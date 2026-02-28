@@ -2,12 +2,21 @@ import './App.css';
 import { FileList } from './components/FileList';
 import { Breadcrumbs } from './components/Breadcrumbs';
 import { ActiveNodeProvider } from './contexts/ActiveNodeContext';
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, PointerSensor, KeyboardSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RawFileNode } from './types';
 
 function App() {
   const queryClient = useQueryClient();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor)
+  );
 
   const moveNodeMutation = useMutation({
     mutationFn: async ({ id, parentId }: { id: string; parentId: string; oldParentId: string }) => {
@@ -68,7 +77,7 @@ function App() {
 
   return (
     <ActiveNodeProvider>
-      <DndContext onDragEnd={handleDragEnd}>
+      <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
         <div className="app-container">
           <h2>File Explorer</h2>
           <Breadcrumbs />
