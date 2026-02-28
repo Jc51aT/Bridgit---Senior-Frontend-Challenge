@@ -1,7 +1,7 @@
 import React from 'react';
-import { RawFileNode } from '../types';
+import { FileNode } from '../types';
 
-export const File: React.FC<{ node: RawFileNode }> = ({ node }) => {
+export const File: React.FC<{ node: FileNode }> = ({ node }) => {
     const handleToggleSelection = () => {
         console.log('toggleSelection', node.id);
     };

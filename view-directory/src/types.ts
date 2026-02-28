@@ -1,11 +1,20 @@
 export type FileType = 'file' | 'directory';
 
-export interface RawFileNode {
+export interface BaseNode {
     id: string;
     name: string;
-    type: FileType;
-    content?: string; // Only present if type === 'file'
     parentId: string | null;
 }
+
+export interface FileNode extends BaseNode {
+    type: 'file';
+    content?: string;
+}
+
+export interface DirectoryNode extends BaseNode {
+    type: 'directory';
+}
+
+export type RawFileNode = FileNode | DirectoryNode;
 
 export type FetchFilesResponse = RawFileNode[];

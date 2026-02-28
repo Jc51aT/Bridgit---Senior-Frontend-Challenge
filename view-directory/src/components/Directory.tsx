@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { RawFileNode } from '../types';
+import { DirectoryNode, RawFileNode } from '../types';
 import { FileList } from './FileList';
 import { useQueryClient } from '@tanstack/react-query';
 
-export const Directory: React.FC<{ node: RawFileNode }> = ({ node }) => {
+export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
     const [isOpen, setIsOpen] = useState(false);
     const queryClient = useQueryClient();
 
