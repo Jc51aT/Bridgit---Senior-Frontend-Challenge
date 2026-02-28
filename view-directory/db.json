@@ -1,0 +1,49 @@
+{
+    "files": [
+        {
+            "id": "1",
+            "name": "Documents",
+            "type": "directory",
+            "children": [
+                {
+                    "id": "2",
+                    "name": "projects",
+                    "type": "directory",
+                    "children": [
+                        {
+                            "id": "3",
+                            "name": "project_alpha.txt",
+                            "type": "file",
+                            "content": "Project Alpha details..."
+                        }
+                    ]
+                },
+                {
+                    "id": "4",
+                    "name": "notes.txt",
+                    "type": "file",
+                    "content": "Meeting at 10 AM regarding new designs."
+                }
+            ]
+        },
+        {
+            "id": "5",
+            "name": "Images",
+            "type": "directory",
+            "children": [
+                {
+                    "id": "6",
+                    "name": "logo.png",
+                    "type": "file",
+                    "content": "binary data simulation..."
+                }
+            ]
+        },
+        {
+            "id": "7",
+            "name": "index.html",
+            "type": "file",
+            "content": "<!DOCTYPE html>\n<html>\n<head><title>Test</title></head>\n<body>\n  <h1>Welcome</h1>\n</body>\n</html>"
+        }
+    ]
+}
