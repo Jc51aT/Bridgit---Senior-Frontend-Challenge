@@ -11185,7 +11185,7 @@
       "id": "dir-1682",
       "name": "Folder_3_0",
       "type": "directory",
-      "parentId": "dir-1681"
+      "parentId": "dir-1"
     },
     {
       "id": "dir-1683",
@@ -89518,5 +89518,6 @@
       "content": "Just a small file",
       "parentId": "original-dir-1"
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }

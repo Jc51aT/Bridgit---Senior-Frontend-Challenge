@@ -4,9 +4,11 @@ import { handleTreeKeyDown } from '../utils/keyboardNav';
 import { useActiveNode } from '../contexts/ActiveNodeContext';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { useTranslation } from '../contexts/I18nContext';
 
 export const File: React.FC<{ node: FileNode }> = ({ node }) => {
     const { setActiveNodeId, activeNodeId } = useActiveNode();
+    const { t } = useTranslation();
 
     const handleToggleSelection = () => {
         setActiveNodeId(node.id);
@@ -31,7 +33,7 @@ export const File: React.FC<{ node: FileNode }> = ({ node }) => {
             className="file"
             role="treeitem"
             tabIndex={0}
-            aria-label={`File: ${node.name}`}
+            aria-label={`${t('fileLabel')}${node.name}`}
             onClick={handleToggleSelection}
             onFocus={handleFocus}
             onKeyDown={(e) => {

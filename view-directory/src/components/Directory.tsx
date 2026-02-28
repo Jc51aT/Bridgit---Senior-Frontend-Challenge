@@ -7,12 +7,14 @@ import { useActiveNode } from '../contexts/ActiveNodeContext';
 import { useExpanded } from '../contexts/ExpandedContext';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { useTranslation } from '../contexts/I18nContext';
 
 export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
     const { expandedIds, toggleExpanded } = useExpanded();
     const isOpen = expandedIds.has(node.id);
     const queryClient = useQueryClient();
     const { setActiveNodeId, activeNodeId } = useActiveNode();
+    const { t } = useTranslation();
 
     const handleMouseEnter = () => {
         if (!isOpen) {
@@ -66,7 +68,7 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
                 role="treeitem"
                 tabIndex={0}
                 aria-expanded={isOpen}
-                aria-label={`Folder: ${node.name}`}
+                aria-label={`${t('folderLabel')}${node.name}`}
                 onClick={handleToggle}
                 onFocus={handleFocus}
                 onKeyDown={(e) => {

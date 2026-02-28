@@ -6,9 +6,11 @@ import { ExpandedProvider } from './contexts/ExpandedContext';
 import { DndContext, DragEndEvent, PointerSensor, KeyboardSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RawFileNode } from './types';
+import { useTranslation } from './contexts/I18nContext';
 
 function App() {
   const queryClient = useQueryClient();
+  const { t, language, setLanguage } = useTranslation();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -76,14 +78,35 @@ function App() {
     }
   };
 
+  const toggleLanguage = () => {
+    setLanguage(language === 'en' ? 'fr' : 'en');
+  };
+
   return (
     <ExpandedProvider>
       <ActiveNodeProvider>
         <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
           <div className="app-container">
-            <h2>File Explorer</h2>
+            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2>{t('appTitle')}</h2>
+              <button
+                onClick={toggleLanguage}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-color)',
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer',
+                  fontWeight: '600'
+                }}
+                aria-label="Toggle language"
+              >
+                {language === 'en' ? 'FR' : 'EN'}
+              </button>
+            </header>
             <Breadcrumbs />
-            <main aria-label="File Explorer">
+            <main aria-label={t('appTitle')}>
               <div className="explorer-root" style={{ textAlign: 'left', minWidth: '300px' }}>
                 <FileList parentId="root" />
               </div>

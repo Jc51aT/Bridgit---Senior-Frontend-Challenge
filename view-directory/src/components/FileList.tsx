@@ -3,10 +3,12 @@ import { useDirectory } from '../hooks/useDirectory';
 import { Directory } from './Directory';
 import { File } from './File';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { useTranslation } from '../contexts/I18nContext';
 
 export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
     const { data: nodes, isLoading, isError, error } = useDirectory(parentId);
     const parentRef = useRef<HTMLDivElement>(null);
+    const { t } = useTranslation();
 
     const rowVirtualizer = useVirtualizer({
         count: nodes?.length ?? 0,
@@ -18,7 +20,7 @@ export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
     if (isLoading) {
         return (
             <div style={{ padding: '12px 24px', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9em' }}>
-                <span style={{ marginRight: '8px' }}>⏳</span> Loading...
+                <span style={{ marginRight: '8px' }}>⏳</span> {t('loading')}
             </div>
         );
     }
@@ -26,7 +28,7 @@ export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
     if (isError) {
         return (
             <div style={{ padding: '12px 24px', color: '#ef4444', fontSize: '0.9em', backgroundColor: '#fef2f2', borderRadius: 'var(--radius-sm)', margin: '8px 0' }}>
-                <span style={{ marginRight: '8px' }}>⚠️</span> Error loading folder: {(error as Error).message}
+                <span style={{ marginRight: '8px' }}>⚠️</span> {t('errorLoading')}{(error as Error).message}
             </div>
         );
     }
@@ -34,7 +36,7 @@ export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
     if (!nodes || nodes.length === 0) {
         return (
             <div style={{ padding: '12px 24px', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9em' }}>
-                (Empty folder)
+                {t('emptyFolder')}
             </div>
         );
     }

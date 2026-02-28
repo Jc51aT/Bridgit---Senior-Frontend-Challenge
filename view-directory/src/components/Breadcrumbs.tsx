@@ -3,11 +3,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useActiveNode } from '../contexts/ActiveNodeContext';
 import { useExpanded } from '../contexts/ExpandedContext';
 import { RawFileNode } from '../types';
+import { useTranslation } from '../contexts/I18nContext';
 
 export const Breadcrumbs: React.FC = () => {
     const { activeNodeId, setActiveNodeId } = useActiveNode();
     const { toggleExpanded, setExpandedIds } = useExpanded();
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
 
     const path = useMemo(() => {
         if (!activeNodeId) return [];
@@ -45,7 +47,7 @@ export const Breadcrumbs: React.FC = () => {
     }, [activeNodeId, queryClient]);
 
     if (!activeNodeId) {
-        return <div className="breadcrumbs" style={{ padding: '8px', minHeight: '36px' }}>Select a file or folder</div>;
+        return <div className="breadcrumbs" style={{ padding: '8px', minHeight: '36px' }}>{t('selectFileOrFolder')}</div>;
     }
 
     const handleRootClick = () => {
@@ -104,7 +106,7 @@ export const Breadcrumbs: React.FC = () => {
                 role="button"
                 tabIndex={0}
             >
-                Root
+                {t('root')}
             </span>
             {path.map((node, index) => {
                 const isActive = node.id === activeNodeId;
