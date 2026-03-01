@@ -19,6 +19,11 @@ interface Translations {
     sortType: string;
     sortAsc: string;
     sortDesc: string;
+    contextMenuRename: string;
+    contextMenuDelete: string;
+    contextMenuNewFile: string;
+    contextMenuRenameLabel: string;
+    contextMenuNewFilePrompt: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -39,6 +44,11 @@ const translations: Record<Language, Translations> = {
         sortType: 'Type',
         sortAsc: 'Ascending',
         sortDesc: 'Descending',
+        contextMenuRename: 'Rename',
+        contextMenuDelete: 'Delete',
+        contextMenuNewFile: 'New File',
+        contextMenuRenameLabel: 'Rename file',
+        contextMenuNewFilePrompt: 'New file name:',
     },
     fr: {
         appTitle: 'Explorateur de fichiers',
@@ -57,6 +67,11 @@ const translations: Record<Language, Translations> = {
         sortType: 'Type',
         sortAsc: 'Croissant',
         sortDesc: 'Décroissant',
+        contextMenuRename: 'Renommer',
+        contextMenuDelete: 'Supprimer',
+        contextMenuNewFile: 'Nouveau fichier',
+        contextMenuRenameLabel: 'Renommer le fichier',
+        contextMenuNewFilePrompt: 'Nom du nouveau fichier :',
     }
 };
 

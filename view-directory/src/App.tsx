@@ -7,6 +7,8 @@ import { ActiveNodeProvider } from './contexts/ActiveNodeContext';
 import { ExpandedProvider } from './contexts/ExpandedContext';
 import { SearchProvider } from './contexts/SearchContext';
 import { SortProvider } from './contexts/SortContext';
+import { ContextMenuProvider } from './contexts/ContextMenuContext';
+import { ContextMenu } from './components/ContextMenu';
 import { DndContext, DragEndEvent, PointerSensor, KeyboardSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RawFileNode } from './types';
@@ -91,36 +93,39 @@ function App() {
       <ActiveNodeProvider>
         <SearchProvider>
           <SortProvider>
-            <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
-              <div className="app-container">
-                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h2>{t('appTitle')}</h2>
-                  <button
-                    onClick={toggleLanguage}
-                    style={{
-                      padding: '8px 12px',
-                      borderRadius: 'var(--radius-sm)',
-                      border: '1px solid var(--border-color)',
-                      backgroundColor: 'var(--bg-secondary)',
-                      color: 'var(--text-primary)',
-                      cursor: 'pointer',
-                      fontWeight: '600'
-                    }}
-                    aria-label="Toggle language"
-                  >
-                    {language === 'en' ? 'FR' : 'EN'}
-                  </button>
-                </header>
-                <SearchBar />
-                <SortControls />
-                <Breadcrumbs />
-                <main aria-label={t('appTitle')}>
-                  <div className="explorer-root" style={{ textAlign: 'left', minWidth: '300px' }}>
-                    <FileList parentId="root" />
-                  </div>
-                </main>
-              </div>
-            </DndContext>
+            <ContextMenuProvider>
+              <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
+                <div className="app-container">
+                  <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h2>{t('appTitle')}</h2>
+                    <button
+                      onClick={toggleLanguage}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: 'var(--radius-sm)',
+                        border: '1px solid var(--border-color)',
+                        backgroundColor: 'var(--bg-secondary)',
+                        color: 'var(--text-primary)',
+                        cursor: 'pointer',
+                        fontWeight: '600'
+                      }}
+                      aria-label="Toggle language"
+                    >
+                      {language === 'en' ? 'FR' : 'EN'}
+                    </button>
+                  </header>
+                  <SearchBar />
+                  <SortControls />
+                  <Breadcrumbs />
+                  <main aria-label={t('appTitle')}>
+                    <div className="explorer-root" style={{ textAlign: 'left', minWidth: '300px' }}>
+                      <FileList parentId="root" />
+                    </div>
+                  </main>
+                </div>
+              </DndContext>
+              <ContextMenu />
+            </ContextMenuProvider>
           </SortProvider>
         </SearchProvider>
       </ActiveNodeProvider>

@@ -7,11 +7,13 @@ import { useSearchContext } from '../contexts/SearchContext';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { useTranslation } from '../contexts/I18nContext';
+import { useContextMenu } from '../contexts/ContextMenuContext';
 
 export const File: React.FC<{ node: FileNode }> = ({ node }) => {
     const { setActiveNodeId, activeNodeId } = useActiveNode();
     const { searchQuery } = useSearchContext();
     const { t } = useTranslation();
+    const { openMenu } = useContextMenu();
 
     const handleToggleSelection = () => {
         setActiveNodeId(node.id);
@@ -19,6 +21,12 @@ export const File: React.FC<{ node: FileNode }> = ({ node }) => {
 
     const handleFocus = () => {
         setActiveNodeId(node.id);
+    };
+
+    const handleContextMenu = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openMenu(node, e.clientX, e.clientY);
     };
 
     const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
@@ -39,6 +47,7 @@ export const File: React.FC<{ node: FileNode }> = ({ node }) => {
             aria-label={`${t('fileLabel')}${node.name}`}
             onClick={handleToggleSelection}
             onFocus={handleFocus}
+            onContextMenu={handleContextMenu}
             onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();

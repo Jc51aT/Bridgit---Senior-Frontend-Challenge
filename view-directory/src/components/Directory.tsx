@@ -10,6 +10,7 @@ import { useSearchContext } from '../contexts/SearchContext';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { useTranslation } from '../contexts/I18nContext';
+import { useContextMenu } from '../contexts/ContextMenuContext';
 
 export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
     const { expandedIds, toggleExpanded } = useExpanded();
@@ -18,6 +19,7 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
     const { setActiveNodeId, activeNodeId } = useActiveNode();
     const { searchQuery } = useSearchContext();
     const { t } = useTranslation();
+    const { openMenu } = useContextMenu();
 
     const handleMouseEnter = () => {
         if (!isOpen) {
@@ -41,6 +43,12 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
 
     const handleFocus = () => {
         setActiveNodeId(node.id);
+    };
+
+    const handleContextMenu = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openMenu(node, e.clientX, e.clientY);
     };
 
     const { setNodeRef: setDroppableNodeRef, isOver } = useDroppable({
@@ -74,6 +82,7 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
                 aria-label={`${t('folderLabel')}${node.name}`}
                 onClick={handleToggle}
                 onFocus={handleFocus}
+                onContextMenu={handleContextMenu}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
