@@ -3,20 +3,30 @@ import { FileList } from './components/FileList';
 import { Breadcrumbs } from './components/Breadcrumbs';
 import { SearchBar } from './components/SearchBar';
 import { SortControls } from './components/SortControls';
+import { SelectionToolbar } from './components/SelectionToolbar';
 import { ActiveNodeProvider } from './contexts/ActiveNodeContext';
 import { ExpandedProvider } from './contexts/ExpandedContext';
 import { SearchProvider } from './contexts/SearchContext';
 import { SortProvider } from './contexts/SortContext';
 import { ContextMenuProvider } from './contexts/ContextMenuContext';
+import { SelectionProvider } from './contexts/SelectionContext';
 import { ContextMenu } from './components/ContextMenu';
 import { DndContext, DragEndEvent, PointerSensor, KeyboardSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RawFileNode } from './types';
 import { useTranslation } from './contexts/I18nContext';
+import { useSelection } from './contexts/SelectionContext';
+import { useDirectory } from './hooks/useDirectory';
 
-function App() {
+// Inner component that has access to SelectionProvider context
+function AppInner() {
   const queryClient = useQueryClient();
   const { t, language, setLanguage } = useTranslation();
+  const { selectedIds } = useSelection();
+
+  // Fetch root nodes so SelectionToolbar can offer "Select All" at root level
+  const { data: rootNodes } = useDirectory('root');
+  const allRootIds = rootNodes ? rootNodes.map(n => n.id) : [];
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -38,7 +48,6 @@ function App() {
       return res.json();
     },
     onMutate: async ({ id, parentId, oldParentId }: { id: string; parentId: string; oldParentId: string }) => {
-      // Optimistic Update
       await queryClient.cancelQueries({ queryKey: ['directory', oldParentId] });
       await queryClient.cancelQueries({ queryKey: ['directory', parentId] });
 
@@ -46,13 +55,11 @@ function App() {
       const prevNew = queryClient.getQueryData<RawFileNode[]>(['directory', parentId]);
       let movedNode: RawFileNode | undefined;
 
-      // Remove from old parent
       if (prevOld) {
         movedNode = prevOld.find(n => n.id === id);
         queryClient.setQueryData<RawFileNode[]>(['directory', oldParentId], prevOld.filter(n => n.id !== id));
       }
 
-      // Add to new parent
       if (prevNew && movedNode) {
         queryClient.setQueryData<RawFileNode[]>(['directory', parentId], [...prevNew, { ...movedNode, parentId }]);
       }
@@ -72,15 +79,37 @@ function App() {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over) return;
-
-    // Ensure we are dropping into a directory that is not ourselves
     if (active.id === over.id) return;
 
     const oldParentId = active.data.current?.parentId;
     const newParentId = over.id as string;
 
-    if (oldParentId && oldParentId !== newParentId) {
-      moveNodeMutation.mutate({ id: active.id as string, parentId: newParentId, oldParentId });
+    if (!oldParentId || oldParentId === newParentId) return;
+
+    // Batch move: if the dragged item is among the selected set, move all selected items
+    const idsToMove = selectedIds.has(active.id as string) && selectedIds.size > 1
+      ? Array.from(selectedIds)
+      : [active.id as string];
+
+    for (const id of idsToMove) {
+      // Determine each item's current parent from cache
+      const itemOldParentId = id === active.id
+        ? oldParentId
+        : (() => {
+          // Look through cached queries for this node
+          const queries = queryClient.getQueriesData<RawFileNode[]>({ queryKey: ['directory'] });
+          for (const [, data] of queries) {
+            if (data?.some(n => n.id === id)) {
+              const node = data.find(n => n.id === id);
+              return node?.parentId ?? 'root';
+            }
+          }
+          return oldParentId;
+        })();
+
+      if (itemOldParentId !== newParentId) {
+        moveNodeMutation.mutate({ id, parentId: newParentId, oldParentId: itemOldParentId });
+      }
     }
   };
 
@@ -89,49 +118,57 @@ function App() {
   };
 
   return (
+    <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
+      <div className="app-container">
+        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2>{t('appTitle')}</h2>
+          <button
+            onClick={toggleLanguage}
+            style={{
+              padding: '8px 12px',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)',
+              backgroundColor: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+              fontWeight: '600'
+            }}
+            aria-label="Toggle language"
+          >
+            {language === 'en' ? 'FR' : 'EN'}
+          </button>
+        </header>
+        <SearchBar />
+        <SortControls />
+        <Breadcrumbs />
+        <main aria-label={t('appTitle')}>
+          <div className="explorer-root" style={{ textAlign: 'left', minWidth: '300px' }}>
+            <FileList parentId="root" />
+          </div>
+        </main>
+      </div>
+      <ContextMenu />
+      <SelectionToolbar allRootIds={allRootIds} />
+    </DndContext>
+  );
+}
+
+function App() {
+  return (
     <ExpandedProvider>
       <ActiveNodeProvider>
         <SearchProvider>
           <SortProvider>
             <ContextMenuProvider>
-              <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
-                <div className="app-container">
-                  <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h2>{t('appTitle')}</h2>
-                    <button
-                      onClick={toggleLanguage}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: 'var(--radius-sm)',
-                        border: '1px solid var(--border-color)',
-                        backgroundColor: 'var(--bg-secondary)',
-                        color: 'var(--text-primary)',
-                        cursor: 'pointer',
-                        fontWeight: '600'
-                      }}
-                      aria-label="Toggle language"
-                    >
-                      {language === 'en' ? 'FR' : 'EN'}
-                    </button>
-                  </header>
-                  <SearchBar />
-                  <SortControls />
-                  <Breadcrumbs />
-                  <main aria-label={t('appTitle')}>
-                    <div className="explorer-root" style={{ textAlign: 'left', minWidth: '300px' }}>
-                      <FileList parentId="root" />
-                    </div>
-                  </main>
-                </div>
-              </DndContext>
-              <ContextMenu />
+              <SelectionProvider>
+                <AppInner />
+              </SelectionProvider>
             </ContextMenuProvider>
           </SortProvider>
         </SearchProvider>
       </ActiveNodeProvider>
     </ExpandedProvider>
-  )
+  );
 }
 
-export default App
-
+export default App;

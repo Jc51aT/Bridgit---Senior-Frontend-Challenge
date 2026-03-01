@@ -2,12 +2,14 @@ import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { useContextMenu } from '../contexts/ContextMenuContext';
 import { useTranslation } from '../contexts/I18nContext';
+import { useSelection } from '../contexts/SelectionContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { RawFileNode } from '../types';
 
 export const ContextMenu: React.FC = () => {
     const { menuState, closeMenu } = useContextMenu();
     const { t } = useTranslation();
+    const { toggleSelected, selectedIds } = useSelection();
     const queryClient = useQueryClient();
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +51,6 @@ export const ContextMenu: React.FC = () => {
         const trimmed = newName.trim();
         const cacheKey = getParentCacheKey();
 
-        // Optimistic update
         queryClient.setQueryData<RawFileNode[]>(['directory', cacheKey], (old = []) =>
             old.map(n => (n.id === node.id ? { ...n, name: trimmed } : n))
         );
@@ -61,7 +62,6 @@ export const ContextMenu: React.FC = () => {
         })
             .then(res => { if (!res.ok) throw new Error('Failed'); })
             .catch(() => {
-                // Rollback
                 queryClient.setQueryData<RawFileNode[]>(['directory', cacheKey], (old = []) =>
                     old.map(n => (n.id === node.id ? { ...n, name: node.name } : n))
                 );
@@ -75,7 +75,6 @@ export const ContextMenu: React.FC = () => {
         closeMenu();
         const cacheKey = getParentCacheKey();
 
-        // Optimistic update
         const prev = queryClient.getQueryData<RawFileNode[]>(['directory', cacheKey]);
         queryClient.setQueryData<RawFileNode[]>(['directory', cacheKey], (old = []) =>
             old.filter(n => n.id !== node.id)
@@ -84,7 +83,6 @@ export const ContextMenu: React.FC = () => {
         fetch(`http://localhost:3001/files/${node.id}`, { method: 'DELETE' })
             .then(res => { if (!res.ok) throw new Error('Failed'); })
             .catch(() => {
-                // Rollback
                 if (prev) queryClient.setQueryData(['directory', cacheKey], prev);
             })
             .finally(() => {
@@ -98,7 +96,6 @@ export const ContextMenu: React.FC = () => {
         if (!name || name.trim() === '') return;
 
         const trimmed = name.trim();
-        // Directory id is the parentId for new children
         const targetDir = node.id;
 
         const tempNode: RawFileNode = {
@@ -108,7 +105,6 @@ export const ContextMenu: React.FC = () => {
             parentId: targetDir,
         };
 
-        // Optimistic update
         queryClient.setQueryData<RawFileNode[]>(['directory', targetDir], (old = []) => [
             ...old,
             tempNode,
@@ -130,9 +126,15 @@ export const ContextMenu: React.FC = () => {
             });
     };
 
+    const handleToggleSelection = () => {
+        closeMenu();
+        toggleSelected(node.id);
+    };
+
     // ── Render ───────────────────────────────────────────────────────────────
 
     const isDir = node.type === 'directory';
+    const isNodeSelected = selectedIds.has(node.id);
 
     const menu = (
         <div
@@ -143,6 +145,16 @@ export const ContextMenu: React.FC = () => {
             style={{ top: position.y, left: position.x }}
             onContextMenu={e => e.preventDefault()}
         >
+            <button
+                className="context-menu-item"
+                role="menuitem"
+                onClick={handleToggleSelection}
+            >
+                {isNodeSelected ? '☑' : '☐'} {isNodeSelected ? t('contextMenuDeselect') : t('contextMenuSelect')}
+            </button>
+
+            <hr className="context-menu-divider" />
+
             <button
                 className="context-menu-item"
                 role="menuitem"

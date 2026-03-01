@@ -6,12 +6,14 @@ import { SkeletonList } from './SkeletonList';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useTranslation } from '../contexts/I18nContext';
 import { useSortContext } from '../contexts/SortContext';
+import { useSelection } from '../contexts/SelectionContext';
 
 export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
     const { data: nodes, isLoading, isError, error } = useDirectory(parentId);
     const parentRef = useRef<HTMLDivElement>(null);
     const { t } = useTranslation();
     const { sortField, sortDirection } = useSortContext();
+    const { clearSelection } = useSelection();
 
     const sortedNodes = useMemo(() => {
         if (!nodes) return [];
@@ -20,17 +22,18 @@ export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
             if (a.type !== b.type) {
                 return a.type === 'directory' ? -1 : 1;
             }
-            // Within same type, sort by selected field
             let cmp: number;
             if (sortField === 'name') {
                 cmp = a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
             } else {
-                // sortField === 'type': already grouped, so secondary sort by name
                 cmp = a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
             }
             return sortDirection === 'asc' ? cmp : -cmp;
         });
     }, [nodes, sortField, sortDirection]);
+
+    // Ordered IDs for shift-click range selection
+    const siblingIds = useMemo(() => sortedNodes.map(n => n.id), [sortedNodes]);
 
     const rowVirtualizer = useVirtualizer({
         count: sortedNodes.length,
@@ -59,6 +62,13 @@ export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
         );
     }
 
+    const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        // Only clear if clicking directly on the container (not a child)
+        if (e.target === e.currentTarget) {
+            clearSelection();
+        }
+    };
+
     return (
         <div
             ref={parentRef}
@@ -66,6 +76,7 @@ export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
                 height: parentId === 'root' ? '80vh' : '400px',
                 overflowY: 'auto'
             }}
+            onClick={handleBackgroundClick}
         >
             <div
                 className="file-list"
@@ -75,6 +86,7 @@ export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
                     width: '100%',
                     position: 'relative'
                 }}
+                onClick={handleBackgroundClick}
             >
                 {rowVirtualizer.getVirtualItems().map((virtualItem) => {
                     const node = sortedNodes[virtualItem.index];
@@ -92,8 +104,8 @@ export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
                             }}
                         >
                             {node.type === 'directory'
-                                ? <Directory node={node} />
-                                : <File node={node} />
+                                ? <Directory node={node} siblingIds={siblingIds} />
+                                : <File node={node} siblingIds={siblingIds} />
                             }
                         </div>
                     );
@@ -102,4 +114,3 @@ export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
         </div>
     );
 };
-

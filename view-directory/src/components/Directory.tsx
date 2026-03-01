@@ -7,12 +7,18 @@ import { handleTreeKeyDown } from '../utils/keyboardNav';
 import { useActiveNode } from '../contexts/ActiveNodeContext';
 import { useExpanded } from '../contexts/ExpandedContext';
 import { useSearchContext } from '../contexts/SearchContext';
+import { useSelection } from '../contexts/SelectionContext';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { useTranslation } from '../contexts/I18nContext';
 import { useContextMenu } from '../contexts/ContextMenuContext';
 
-export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
+interface DirectoryProps {
+    node: DirectoryNode;
+    siblingIds: string[];
+}
+
+export const Directory: React.FC<DirectoryProps> = ({ node, siblingIds }) => {
     const { expandedIds, toggleExpanded } = useExpanded();
     const isOpen = expandedIds.has(node.id);
     const queryClient = useQueryClient();
@@ -20,10 +26,13 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
     const { searchQuery } = useSearchContext();
     const { t } = useTranslation();
     const { openMenu } = useContextMenu();
+    const { selectedIds, isMultiSelectMode, toggleSelected, selectRange, clearSelection, setLastClickedId } = useSelection();
+
+    const isSelected = selectedIds.has(node.id);
+    const isActive = activeNodeId === node.id;
 
     const handleMouseEnter = () => {
         if (!isOpen) {
-            // Prefetch on hover just like before, but leveraging React Query cache
             queryClient.prefetchQuery({
                 queryKey: ['directory', node.id],
                 queryFn: async (): Promise<RawFileNode[]> => {
@@ -31,14 +40,26 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
                     if (!res.ok) throw new Error("Network error");
                     return res.json();
                 },
-                staleTime: 1000 * 60 * 5, // 5 minutes
+                staleTime: 1000 * 60 * 5,
             });
         }
     };
 
-    const handleToggle = () => {
-        toggleExpanded(node.id);
-        setActiveNodeId(node.id);
+    const handleClick = (e: React.MouseEvent) => {
+        if (e.metaKey || e.ctrlKey) {
+            e.preventDefault();
+            toggleSelected(node.id);
+        } else if (e.shiftKey) {
+            e.preventDefault();
+            selectRange(node.id, siblingIds);
+        } else {
+            if (isMultiSelectMode) {
+                clearSelection();
+            }
+            setLastClickedId(node.id);
+            toggleExpanded(node.id);
+            setActiveNodeId(node.id);
+        }
     };
 
     const handleFocus = () => {
@@ -66,8 +87,13 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
         setDraggableNodeRef(element);
     };
 
-    const isActive = activeNodeId === node.id;
     const dragOverStyle = isOver ? { backgroundColor: 'var(--accent-color)', color: 'white', borderRadius: 'var(--radius-md)' } : {};
+
+    const bgColor = isSelected
+        ? 'var(--bg-selected)'
+        : isActive
+            ? 'var(--bg-active)'
+            : 'transparent';
 
     return (
         <div className="directory" style={{ margin: '2px 0' }}>
@@ -75,22 +101,26 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
                 ref={setMergedRef}
                 {...listeners}
                 {...attributes}
-                className="directory-header"
+                className={`directory-header${isSelected ? ' node--selected' : ''}`}
                 role="treeitem"
                 tabIndex={0}
                 aria-expanded={isOpen}
+                aria-selected={isSelected}
                 aria-label={`${t('folderLabel')}${node.name}`}
-                onClick={handleToggle}
+                onClick={handleClick}
                 onFocus={handleFocus}
                 onContextMenu={handleContextMenu}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        handleToggle();
+                        handleClick(e as unknown as React.MouseEvent);
                     } else {
                         handleTreeKeyDown(e as React.KeyboardEvent<HTMLElement>, {
                             isOpen,
-                            toggle: handleToggle,
+                            toggle: () => {
+                                toggleExpanded(node.id);
+                                setActiveNodeId(node.id);
+                            },
                             isDir: true,
                         });
                     }
@@ -103,21 +133,29 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
                     padding: '8px 12px',
                     borderRadius: 'var(--radius-md)',
                     userSelect: 'none',
-                    opacity: isDragging ? 0.5 : 1,
+                    opacity: isDragging ? 0.4 : 1,
                     transform: CSS.Translate.toString(transform),
-                    backgroundColor: isActive ? 'var(--bg-active)' : 'transparent',
-                    color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                    transition: 'all 0.2s ease',
-                    fontWeight: isOpen || isActive ? '600' : '500',
+                    backgroundColor: bgColor,
+                    color: isSelected || isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                    transition: 'all 0.15s ease',
+                    fontWeight: isOpen || isActive || isSelected ? '600' : '500',
+                    borderLeft: isSelected ? '3px solid var(--accent-color)' : '3px solid transparent',
                     ...dragOverStyle
                 }}
                 onMouseOver={(e) => {
-                    if (!isActive && !isOver) e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
+                    if (!isSelected && !isActive && !isOver) e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
                 }}
                 onMouseOut={(e) => {
-                    if (!isActive && !isOver) e.currentTarget.style.backgroundColor = 'transparent';
+                    if (!isSelected && !isActive && !isOver) e.currentTarget.style.backgroundColor = isSelected ? 'var(--bg-selected)' : 'transparent';
                 }}
             >
+                {/* Checkbox indicator — visible in multi-select mode */}
+                {isMultiSelectMode && (
+                    <span
+                        className={`selection-checkbox${isSelected ? ' selection-checkbox--checked' : ''}`}
+                        aria-hidden="true"
+                    />
+                )}
                 <span
                     style={{
                         marginRight: '12px',

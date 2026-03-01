@@ -4,19 +4,42 @@ import { HighlightMatch } from './SearchBar';
 import { handleTreeKeyDown } from '../utils/keyboardNav';
 import { useActiveNode } from '../contexts/ActiveNodeContext';
 import { useSearchContext } from '../contexts/SearchContext';
+import { useSelection } from '../contexts/SelectionContext';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { useTranslation } from '../contexts/I18nContext';
 import { useContextMenu } from '../contexts/ContextMenuContext';
 
-export const File: React.FC<{ node: FileNode }> = ({ node }) => {
+interface FileProps {
+    node: FileNode;
+    siblingIds: string[];
+}
+
+export const File: React.FC<FileProps> = ({ node, siblingIds }) => {
     const { setActiveNodeId, activeNodeId } = useActiveNode();
     const { searchQuery } = useSearchContext();
     const { t } = useTranslation();
     const { openMenu } = useContextMenu();
+    const { selectedIds, isMultiSelectMode, toggleSelected, selectRange, clearSelection, setLastClickedId } = useSelection();
 
-    const handleToggleSelection = () => {
-        setActiveNodeId(node.id);
+    const isSelected = selectedIds.has(node.id);
+    const isActive = activeNodeId === node.id;
+
+    const handleClick = (e: React.MouseEvent) => {
+        if (e.metaKey || e.ctrlKey) {
+            e.preventDefault();
+            toggleSelected(node.id);
+        } else if (e.shiftKey) {
+            e.preventDefault();
+            selectRange(node.id, siblingIds);
+        } else {
+            // Plain click: clear multi-select, set single active
+            if (isMultiSelectMode) {
+                clearSelection();
+            }
+            setLastClickedId(node.id);
+            setActiveNodeId(node.id);
+        }
     };
 
     const handleFocus = () => {
@@ -34,24 +57,31 @@ export const File: React.FC<{ node: FileNode }> = ({ node }) => {
         data: { parentId: node.parentId, type: 'file' }
     });
 
-    const isActive = activeNodeId === node.id;
+    const bgColor = isSelected
+        ? 'var(--bg-selected)'
+        : isActive
+            ? 'var(--bg-active)'
+            : 'transparent';
+
+    const textColor = isSelected || isActive ? 'var(--text-primary)' : 'var(--text-secondary)';
 
     return (
         <div
             ref={setNodeRef}
             {...listeners}
             {...attributes}
-            className="file"
+            className={`file${isSelected ? ' node--selected' : ''}`}
             role="treeitem"
             tabIndex={0}
             aria-label={`${t('fileLabel')}${node.name}`}
-            onClick={handleToggleSelection}
+            aria-selected={isSelected}
+            onClick={handleClick}
             onFocus={handleFocus}
             onContextMenu={handleContextMenu}
             onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    handleToggleSelection();
+                    handleClick(e as unknown as React.MouseEvent);
                 } else {
                     handleTreeKeyDown(e as React.KeyboardEvent<HTMLElement>);
                 }
@@ -64,19 +94,27 @@ export const File: React.FC<{ node: FileNode }> = ({ node }) => {
                 margin: '2px 0',
                 borderRadius: 'var(--radius-md)',
                 userSelect: 'none',
-                opacity: isDragging ? 0.5 : 1,
+                opacity: isDragging ? 0.4 : 1,
                 transform: CSS.Translate.toString(transform),
-                backgroundColor: isActive ? 'var(--bg-active)' : 'transparent',
-                color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                transition: 'all 0.2s ease',
+                backgroundColor: bgColor,
+                color: textColor,
+                transition: 'all 0.15s ease',
+                borderLeft: isSelected ? '3px solid var(--accent-color)' : '3px solid transparent',
             }}
             onMouseEnter={(e) => {
-                if (!isActive) e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
+                if (!isSelected && !isActive) e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
             }}
             onMouseLeave={(e) => {
-                if (!isActive) e.currentTarget.style.backgroundColor = 'transparent';
+                if (!isSelected && !isActive) e.currentTarget.style.backgroundColor = 'transparent';
             }}
         >
+            {/* Checkbox indicator — visible in multi-select mode */}
+            {isMultiSelectMode && (
+                <span
+                    className={`selection-checkbox${isSelected ? ' selection-checkbox--checked' : ''}`}
+                    aria-hidden="true"
+                />
+            )}
             <span
                 style={{
                     marginRight: '12px',
@@ -86,7 +124,9 @@ export const File: React.FC<{ node: FileNode }> = ({ node }) => {
             >
                 📄
             </span>
-            <span style={{ fontWeight: isActive ? '500' : '400' }}><HighlightMatch text={node.name} query={searchQuery} /></span>
+            <span style={{ fontWeight: isActive || isSelected ? '500' : '400' }}>
+                <HighlightMatch text={node.name} query={searchQuery} />
+            </span>
         </div>
     );
 };

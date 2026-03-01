@@ -4,6 +4,7 @@
   --bg-secondary: #ffffff;
   --bg-hover: #e2e8f0;
   --bg-active: #cbd5e1;
+  --bg-selected: rgba(59, 130, 246, 0.1);
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --accent-color: #3b82f6;
@@ -42,6 +43,7 @@
     --bg-secondary: #1e293b;
     --bg-hover: #334155;
     --bg-active: #475569;
+    --bg-selected: rgba(96, 165, 250, 0.15);
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --accent-color: #60a5fa;
@@ -252,4 +254,185 @@ button:focus-visible {
   margin: 4px 0;
   border: none;
   border-top: 1px solid var(--border-color);
+}
+
+/* ─── Multi-Select: Checkbox Indicator ──────────────────────────────────── */
+.selection-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 3px;
+  margin-right: 10px;
+  background: var(--bg-primary);
+  transition: all 0.15s ease;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.selection-checkbox--checked {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.selection-checkbox--checked::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0px;
+  width: 5px;
+  height: 9px;
+  border: 2px solid white;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+/* ─── Multi-Select: Selected Node Highlight ─────────────────────────────── */
+.node--selected {
+  background-color: var(--bg-selected) !important;
+}
+
+/* ─── Selection Toolbar ─────────────────────────────────────────────────── */
+.selection-toolbar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  animation: toolbar-slide-up 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: auto;
+}
+
+@keyframes toolbar-slide-up {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+.selection-toolbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 10px 16px;
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(59, 130, 246, 0.15);
+  white-space: nowrap;
+}
+
+.selection-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.selection-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 99px;
+  background: var(--accent-color);
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.selection-count-label {
+  font-weight: 500;
+}
+
+.selection-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border-color);
+}
+
+/* ─── Toolbar Buttons ───────────────────────────────────────────────────── */
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  box-shadow: none;
+  white-space: nowrap;
+}
+
+.toolbar-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent-color);
+  transform: none;
+  box-shadow: none;
+}
+
+.toolbar-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-secondary);
+}
+
+.toolbar-btn--ghost:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.toolbar-btn--danger {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.toolbar-btn--danger:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+  color: #dc2626;
+}
+
+@media (prefers-color-scheme: dark) {
+  .toolbar-btn--danger:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+  }
+}
+
+.toolbar-btn--icon {
+  padding: 6px 8px;
+  min-width: 32px;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  border-color: transparent;
+  background: transparent;
+}
+
+.toolbar-btn--icon:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-color);
+  color: var(--text-primary);
 }

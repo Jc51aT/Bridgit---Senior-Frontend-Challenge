@@ -24,6 +24,13 @@ interface Translations {
     contextMenuNewFile: string;
     contextMenuRenameLabel: string;
     contextMenuNewFilePrompt: string;
+    contextMenuSelect: string;
+    contextMenuDeselect: string;
+    itemSelected: string;
+    itemsSelected: string;
+    deleteSelected: string;
+    selectAll: string;
+    clearSelection: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -49,6 +56,13 @@ const translations: Record<Language, Translations> = {
         contextMenuNewFile: 'New File',
         contextMenuRenameLabel: 'Rename file',
         contextMenuNewFilePrompt: 'New file name:',
+        contextMenuSelect: 'Add to Selection',
+        contextMenuDeselect: 'Remove from Selection',
+        itemSelected: 'item selected',
+        itemsSelected: 'items selected',
+        deleteSelected: 'Delete Selected',
+        selectAll: 'Select All',
+        clearSelection: 'Clear Selection',
     },
     fr: {
         appTitle: 'Explorateur de fichiers',
@@ -72,6 +86,13 @@ const translations: Record<Language, Translations> = {
         contextMenuNewFile: 'Nouveau fichier',
         contextMenuRenameLabel: 'Renommer le fichier',
         contextMenuNewFilePrompt: 'Nom du nouveau fichier :',
+        contextMenuSelect: 'Ajouter à la sélection',
+        contextMenuDeselect: 'Retirer de la sélection',
+        itemSelected: 'élément sélectionné',
+        itemsSelected: 'éléments sélectionnés',
+        deleteSelected: 'Supprimer la sélection',
+        selectAll: 'Tout sélectionner',
+        clearSelection: 'Désélectionner tout',
     }
 };
 
