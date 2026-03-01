@@ -1,17 +1,38 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useDirectory } from '../hooks/useDirectory';
 import { Directory } from './Directory';
 import { File } from './File';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useTranslation } from '../contexts/I18nContext';
+import { useSortContext } from '../contexts/SortContext';
 
 export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
     const { data: nodes, isLoading, isError, error } = useDirectory(parentId);
     const parentRef = useRef<HTMLDivElement>(null);
     const { t } = useTranslation();
+    const { sortField, sortDirection } = useSortContext();
+
+    const sortedNodes = useMemo(() => {
+        if (!nodes) return [];
+        return [...nodes].sort((a, b) => {
+            // Directories always come first
+            if (a.type !== b.type) {
+                return a.type === 'directory' ? -1 : 1;
+            }
+            // Within same type, sort by selected field
+            let cmp: number;
+            if (sortField === 'name') {
+                cmp = a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+            } else {
+                // sortField === 'type': already grouped, so secondary sort by name
+                cmp = a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+            }
+            return sortDirection === 'asc' ? cmp : -cmp;
+        });
+    }, [nodes, sortField, sortDirection]);
 
     const rowVirtualizer = useVirtualizer({
-        count: nodes?.length ?? 0,
+        count: sortedNodes.length,
         getScrollElement: () => parentRef.current,
         estimateSize: () => 32,
         overscan: 5,
@@ -59,7 +80,7 @@ export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
                 }}
             >
                 {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-                    const node = nodes[virtualItem.index];
+                    const node = sortedNodes[virtualItem.index];
                     return (
                         <div
                             key={node.id}

@@ -14,6 +14,11 @@ interface Translations {
     searchPlaceholder: string;
     noResults: string;
     searchResultsCount: string;
+    sortBy: string;
+    sortName: string;
+    sortType: string;
+    sortAsc: string;
+    sortDesc: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -29,6 +34,11 @@ const translations: Record<Language, Translations> = {
         searchPlaceholder: 'Search files and folders...',
         noResults: 'No results found',
         searchResultsCount: '{count} results found',
+        sortBy: 'Sort by:',
+        sortName: 'Name',
+        sortType: 'Type',
+        sortAsc: 'Ascending',
+        sortDesc: 'Descending',
     },
     fr: {
         appTitle: 'Explorateur de fichiers',
@@ -42,6 +52,11 @@ const translations: Record<Language, Translations> = {
         searchPlaceholder: 'Rechercher des fichiers et dossiers...',
         noResults: 'Aucun résultat trouvé',
         searchResultsCount: '{count} résultats trouvés',
+        sortBy: 'Trier par:',
+        sortName: 'Nom',
+        sortType: 'Type',
+        sortAsc: 'Croissant',
+        sortDesc: 'Décroissant',
     }
 };
 
