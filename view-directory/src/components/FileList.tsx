@@ -2,6 +2,7 @@ import React, { useRef, useMemo } from 'react';
 import { useDirectory } from '../hooks/useDirectory';
 import { Directory } from './Directory';
 import { File } from './File';
+import { SkeletonList } from './SkeletonList';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useTranslation } from '../contexts/I18nContext';
 import { useSortContext } from '../contexts/SortContext';
@@ -39,11 +40,7 @@ export const FileList: React.FC<{ parentId: string }> = ({ parentId }) => {
     });
 
     if (isLoading) {
-        return (
-            <div style={{ padding: '12px 24px', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9em' }}>
-                <span style={{ marginRight: '8px' }}>⏳</span> {t('loading')}
-            </div>
-        );
+        return <SkeletonList />;
     }
 
     if (isError) {

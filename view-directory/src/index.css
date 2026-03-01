@@ -9,7 +9,7 @@
   --accent-color: #3b82f6;
   --accent-hover: #2563eb;
   --border-color: #e2e8f0;
-  
+
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -52,7 +52,7 @@
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
-    
+
     color: var(--text-primary);
     background-color: var(--bg-primary);
   }
@@ -79,7 +79,12 @@ body {
   background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: var(--text-primary);
   margin-top: 0;
 }
@@ -144,4 +149,30 @@ button:focus-visible {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
+}
+
+/* ─── Skeleton / Loading shimmer ─────────────────────────────────────── */
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.skeleton-item {
+  display: block;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-hover);
+}
+
+.skeleton-shimmer {
+  background-image: linear-gradient(90deg,
+      var(--bg-hover) 0%,
+      var(--bg-active) 50%,
+      var(--bg-hover) 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
 }
