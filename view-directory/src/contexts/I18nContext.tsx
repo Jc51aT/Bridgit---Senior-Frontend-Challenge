@@ -11,6 +11,9 @@ interface Translations {
     emptyFolder: string;
     folderLabel: string;
     fileLabel: string;
+    searchPlaceholder: string;
+    noResults: string;
+    searchResultsCount: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -23,6 +26,9 @@ const translations: Record<Language, Translations> = {
         emptyFolder: '(Empty folder)',
         folderLabel: 'Folder: ',
         fileLabel: 'File: ',
+        searchPlaceholder: 'Search files and folders...',
+        noResults: 'No results found',
+        searchResultsCount: '{count} results found',
     },
     fr: {
         appTitle: 'Explorateur de fichiers',
@@ -33,6 +39,9 @@ const translations: Record<Language, Translations> = {
         emptyFolder: '(Dossier vide)',
         folderLabel: 'Dossier: ',
         fileLabel: 'Fichier: ',
+        searchPlaceholder: 'Rechercher des fichiers et dossiers...',
+        noResults: 'Aucun résultat trouvé',
+        searchResultsCount: '{count} résultats trouvés',
     }
 };
 

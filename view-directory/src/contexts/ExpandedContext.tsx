@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 interface ExpandedContextType {
     expandedIds: Set<string>;
     toggleExpanded: (id: string, forceStatus?: boolean) => void;
+    expandMultiple: (ids: string[]) => void;
     setExpandedIds: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
 
@@ -26,8 +27,18 @@ export const ExpandedProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         });
     }, []);
 
+    const expandMultiple = useCallback((ids: string[]) => {
+        setExpandedIds(prev => {
+            const next = new Set(prev);
+            for (const id of ids) {
+                next.add(id);
+            }
+            return next;
+        });
+    }, []);
+
     return (
-        <ExpandedContext.Provider value={{ expandedIds, toggleExpanded, setExpandedIds }}>
+        <ExpandedContext.Provider value={{ expandedIds, toggleExpanded, expandMultiple, setExpandedIds }}>
             {children}
         </ExpandedContext.Provider>
     );

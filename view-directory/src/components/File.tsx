@@ -1,13 +1,16 @@
 import React from 'react';
 import { FileNode } from '../types';
+import { HighlightMatch } from './SearchBar';
 import { handleTreeKeyDown } from '../utils/keyboardNav';
 import { useActiveNode } from '../contexts/ActiveNodeContext';
+import { useSearchContext } from '../contexts/SearchContext';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { useTranslation } from '../contexts/I18nContext';
 
 export const File: React.FC<{ node: FileNode }> = ({ node }) => {
     const { setActiveNodeId, activeNodeId } = useActiveNode();
+    const { searchQuery } = useSearchContext();
     const { t } = useTranslation();
 
     const handleToggleSelection = () => {
@@ -74,7 +77,7 @@ export const File: React.FC<{ node: FileNode }> = ({ node }) => {
             >
                 📄
             </span>
-            <span style={{ fontWeight: isActive ? '500' : '400' }}>{node.name}</span>
+            <span style={{ fontWeight: isActive ? '500' : '400' }}><HighlightMatch text={node.name} query={searchQuery} /></span>
         </div>
     );
 };

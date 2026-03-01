@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { DirectoryNode, RawFileNode } from '../types';
 import { FileList } from './FileList';
+import { HighlightMatch } from './SearchBar';
 import { useQueryClient } from '@tanstack/react-query';
 import { handleTreeKeyDown } from '../utils/keyboardNav';
 import { useActiveNode } from '../contexts/ActiveNodeContext';
 import { useExpanded } from '../contexts/ExpandedContext';
+import { useSearchContext } from '../contexts/SearchContext';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { useTranslation } from '../contexts/I18nContext';
@@ -14,6 +16,7 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
     const isOpen = expandedIds.has(node.id);
     const queryClient = useQueryClient();
     const { setActiveNodeId, activeNodeId } = useActiveNode();
+    const { searchQuery } = useSearchContext();
     const { t } = useTranslation();
 
     const handleMouseEnter = () => {
@@ -118,7 +121,7 @@ export const Directory: React.FC<{ node: DirectoryNode }> = ({ node }) => {
                 >
                     {isOpen ? '📂' : '📁'}
                 </span>
-                <span>{node.name}</span>
+                <span><HighlightMatch text={node.name} query={searchQuery} /></span>
             </div>
 
             {isOpen && (
